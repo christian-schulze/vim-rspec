@@ -1,5 +1,5 @@
 let s:plugin_path = expand("<sfile>:p:h:h")
-let s:default_command = "{cwd} bundle exec rspec {spec}"
+let s:default_command = "bundle exec rspec {spec}"
 let s:force_gui = 0
 
 if !exists("g:rspec_runner")
@@ -41,14 +41,7 @@ endfunction
 " === local functions ===
 
 function! s:RunSpecs(spec_location)
-  let s:cwd_command = ""
-
-  if exists("g:rspec_ensure_cwd")
-    let s:cwd_command = "cd " . getcwd() . "; "
-  endif
-
-  let s:rspec_command = substitute(s:RspecCommand(), "{cwd}", s:cwd_command, "g")
-  let s:rspec_command = substitute(s:rspec_command, "{spec}", a:spec_location, "g")
+  let s:rspec_command = substitute(s:RspecCommand(), "{spec}", a:spec_location, "g")
 
   execute s:rspec_command
 endfunction
@@ -84,7 +77,23 @@ function! s:CurrentFilePath()
 endfunction
 
 function! s:GuiCommand(command)
-  return "silent ! '" . s:plugin_path . "/bin/" . g:rspec_runner . "' '" . a:command . "'"
+  let l:pattern = "silent ! '" . s:plugin_path . "/bin/" . g:rspec_runner . "' '{cwd} {command}'"
+
+  let s:cwd_command = ""
+  if exists("g:rspec_ensure_cwd")
+    let s:cwd_command = "cd " . getcwd() . "; "
+  endif
+
+  if exists("g:rspec_use_wrapper")
+    let l:wrapped_command = substitute(g:rspec_wrapper_command, "{command}", a:command, "g")
+    let l:command = substitute(l:pattern, "{command}", l:wrapped_command, "g")
+  else
+    let l:command = substitute(l:pattern, "{command}", a:command, "g")
+  endif
+
+  let l:command = substitute(l:command, "{cwd}", s:cwd_command, "g")
+
+  return l:command
 endfunction
 
 function! s:ClearCommand()
