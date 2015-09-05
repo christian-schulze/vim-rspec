@@ -1,5 +1,5 @@
 let s:plugin_path = expand("<sfile>:p:h:h")
-let s:default_command = "bundle exec rspec {spec}"
+let s:default_command = "{cwd} bundle exec rspec {spec}"
 let s:force_gui = 0
 
 if !exists("g:rspec_runner")
@@ -41,7 +41,14 @@ endfunction
 " === local functions ===
 
 function! s:RunSpecs(spec_location)
-  let s:rspec_command = substitute(s:RspecCommand(), "{spec}", a:spec_location, "g")
+  let s:cwd_command = ""
+
+  if exists("g:rspec_ensure_cwd")
+    let s:cwd_command = "cd " . getcwd() . "; "
+  endif
+
+  let s:rspec_command = substitute(s:RspecCommand(), "{cwd}", s:cwd_command, "g")
+  let s:rspec_command = substitute(s:rspec_command, "{spec}", a:spec_location, "g")
 
   execute s:rspec_command
 endfunction
