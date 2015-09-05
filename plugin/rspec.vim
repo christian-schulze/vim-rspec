@@ -1,5 +1,5 @@
 let s:plugin_path = expand("<sfile>:p:h:h")
-let s:default_command = "rspec {spec}"
+let s:default_command = "bundle exec rspec {spec}"
 let s:force_gui = 0
 
 if !exists("g:rspec_runner")
